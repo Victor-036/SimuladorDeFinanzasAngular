@@ -26,12 +26,7 @@ import { GastoService } from '../../services/gasto.service';
           </p>
         </div>
 
-        <button (click)="gs.descargarCSV()"
-          class="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-all text-xs font-bold flex items-center gap-1 backdrop-blur-md border border-white/10"
-          title="Exportar a Excel/CSV">
-          ⬇ CSV
-        </button>
-      </div>
+        </div>
 
       <div class="flex justify-between items-end">
          <div class="flex items-baseline gap-1">
@@ -40,6 +35,7 @@ import { GastoService } from '../../services/gasto.service';
          </div>
 
          <div class="text-right">
+             <label class="text-[9px] uppercase opacity-70 block">Meta</label>
              <input type="number" [value]="gs.presupuestoLimite()" (input)="cambiarLimite($event)"
                class="w-16 bg-transparent text-right text-white font-bold border-b border-white/50 focus:border-white outline-none">
          </div>
