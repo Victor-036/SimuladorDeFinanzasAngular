@@ -1,0 +1,11 @@
+{
+  "usuarios": [
+    { "id": 1, "email": "admin@daw.com", "pass": "1234", "nombre": "Jefe" },
+    { "id": 2, "email": "demo@daw.com", "pass": "demo", "nombre": "Estudiante" }
+  ],
+  "gastos": [
+    { "id": 1, "descripcion": "Cena", "monto": 25, "fecha": "2024-03-20", "usuarioId": 1 },
+    { "id": 2, "descripcion": "Libro", "monto": 15, "fecha": "2024-03-21", "usuarioId": 2 }
+  ],
+  "presupuesto": { "limite": 1000 }
+}

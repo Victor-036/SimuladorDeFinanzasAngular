@@ -19,7 +19,7 @@ import { GastoService } from '../../services/gasto.service';
 
       <div class="flex justify-between items-start mb-4 relative z-10">
         <div>
-          <h1 class="text-2xl font-black italic tracking-tighter">DAW Finance</h1>
+          <h1 class="text-2xl font-black italic tracking-tighter">Finance SL</h1>
           <p class="text-[10px] uppercase font-bold opacity-75 flex items-center gap-1">
             <span class="w-2 h-2 rounded-full bg-green-400 inline-block animate-pulse"></span>
             Sistema Activo

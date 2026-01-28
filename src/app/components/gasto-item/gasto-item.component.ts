@@ -38,6 +38,5 @@ export class GastoItemComponent {
   // Outputs: Eventos hacia el padre
   onRemove = output<number>();
 
-  // --- ESTO ES LO QUE TE FALTA ---
   onEdit = output<Gasto>(); // Definimos que este evento envía un objeto Gasto completo
 }
