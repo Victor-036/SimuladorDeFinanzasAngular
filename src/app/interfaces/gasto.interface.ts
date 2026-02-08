@@ -4,4 +4,6 @@ export interface Gasto {
   monto: number;
   categoria: 'Comida' | 'Ocio' | 'Transporte' | 'Otros';
   fecha: string;
+  detalles?: string; // Nuevo campo opcional
+  otrosDescripcion?: string; // Para especificar cuando es "Otros"
 }

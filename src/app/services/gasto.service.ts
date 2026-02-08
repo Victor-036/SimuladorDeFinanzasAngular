@@ -20,7 +20,7 @@ export class GastoService {
   busqueda = signal<string>('');
   categoriaFiltro = signal<string>('TODAS');
 
-  // --- LÓGICA COMPUTADA (Igual que antes) ---
+  // --- LÓGICA COMPUTADA ---
   gastosVisibles = computed(() => {
     const texto = this.busqueda().toLowerCase();
     const cat = this.categoriaFiltro();
@@ -42,7 +42,7 @@ export class GastoService {
   estado = computed(() => {
     const p = this.porcentaje();
     if (p >= 100) return 'CRITICO';
-    if (p >= 75) return 'ALERTA';
+    if (p >= 66) return 'ALERTA'; // 2/3 del presupuesto
     return 'OK';
   });
 
@@ -60,20 +60,41 @@ export class GastoService {
 
   // --- MÉTODOS HTTP ---
 
+  /**
+   * Carga los gastos del usuario actual desde el servidor.
+   * También recupera el presupuesto personalizado del localStorage.
+   */
   cargarDatos() {
     const usuario = this.auth.currentUser();
     if (!usuario) return;
 
-    // PETICIÓN FILTRADA: ?usuarioId=...
+    // 1. Cargar Gastos
     this.http.get<Gasto[]>(`${this.apiUrl}?usuarioId=${usuario.id}`).subscribe({
       next: (datos) => {
         this.gastos.set(datos.reverse());
       },
       error: (e) => console.error('Error cargando gastos:', e)
     });
+
+    // 2. Cargar Presupuesto Personalizado
+    const presupuestoGuardado = localStorage.getItem(`presupuesto_${usuario.id}`);
+    if (presupuestoGuardado) {
+      this.presupuestoLimite.set(Number(presupuestoGuardado));
+    } else {
+      this.presupuestoLimite.set(1000); // Por defecto
+    }
   }
 
-  agregar(desc: string, monto: number, cat: any, fecha: string) {
+  /**
+   * Crea un nuevo gasto y lo asocia al usuario actual.
+   * @param desc Descripción del gasto
+   * @param monto Cantidad en euros
+   * @param cat Categoría del gasto
+   * @param fecha Fecha del gasto
+   * @param detalles Detalles adicionales (opcional)
+   * @param otrosDesc Descripción si la categoría es 'Otros' (opcional)
+   */
+  agregar(desc: string, monto: number, cat: any, fecha: string, detalles?: string, otrosDesc?: string) {
     const usuario = this.auth.currentUser();
     if (!usuario) {
       alert('Error: No hay usuario identificado');
@@ -81,12 +102,14 @@ export class GastoService {
     }
 
     // AÑADIMOS EL ID DEL USUARIO AL GASTO
-    const nuevoGasto = {
+    const nuevoGasto: any = {
       descripcion: desc,
       monto,
       categoria: cat,
       fecha,
-      usuarioId: usuario.id // <--- CLAVE PARA LA RELACIÓN
+      usuarioId: usuario.id,
+      detalles: detalles || '',
+      otrosDescripcion: cat === 'Otros' ? (otrosDesc || '') : ''
     };
 
     this.http.post<Gasto>(this.apiUrl, nuevoGasto).subscribe({
@@ -97,17 +120,23 @@ export class GastoService {
     });
   }
 
-  editar(id: number, desc: string, monto: number, cat: any, fecha: string) {
+  /**
+   * Actualiza un gasto existente.
+   * @param id ID del gasto a editar
+   */
+  editar(id: number, desc: string, monto: number, cat: any, fecha: string, detalles?: string, otrosDesc?: string) {
     const usuario = this.auth.currentUser();
     if (!usuario) return;
 
     // Mantenemos el usuarioId al editar
-    const gastoEditado = {
+    const gastoEditado: any = {
       descripcion: desc,
       monto,
       categoria: cat,
       fecha,
-      usuarioId: usuario.id
+      usuarioId: usuario.id,
+      detalles: detalles || '',
+      otrosDescripcion: cat === 'Otros' ? (otrosDesc || '') : ''
     };
 
     this.http.put<Gasto>(`${this.apiUrl}/${id}`, gastoEditado).subscribe({
@@ -119,6 +148,9 @@ export class GastoService {
     });
   }
 
+  /**
+   * Elimina un gasto por su ID.
+   */
   borrar(id: number) {
     this.http.delete(`${this.apiUrl}/${id}`).subscribe({
       next: () => {
@@ -128,10 +160,25 @@ export class GastoService {
     });
   }
 
-  // --- HELPERS (Sin cambios) ---
+  // --- MÉTODOS AUXILIARES ---
+
+  /** Selecciona un gasto para mostrarlo en el formulario de edición */
   seleccionarParaEditar(gasto: Gasto) { this.gastoSeleccionado.set(gasto); }
+
+  /** Cancela la edición y limpia la selección */
   cancelarEdicion() { this.gastoSeleccionado.set(null); }
-  actualizarPresupuesto(val: number) { this.presupuestoLimite.set(val); }
+
+  /**
+   * Actualiza el límite del presupuesto y lo guarda en localStorage.
+   */
+  actualizarPresupuesto(val: number) {
+    this.presupuestoLimite.set(val);
+    const usuario = this.auth.currentUser();
+    if (usuario) {
+      localStorage.setItem(`presupuesto_${usuario.id}`, val.toString());
+    }
+  }
+
   filtrarPorTexto(t: string) { this.busqueda.set(t); }
   filtrarPorCategoria(c: string) { this.categoriaFiltro.set(c); }
 }

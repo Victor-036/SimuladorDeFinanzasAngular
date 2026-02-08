@@ -1,3 +1,18 @@
+@import 'bootstrap-icons/font/bootstrap-icons.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Fix for mobile scrolling */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    /* Ensure default scroll behavior */
+    overflow-y: auto;
+}
+
+app-root {
+    display: block;
+    height: 100%;
+}

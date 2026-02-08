@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GastoService } from '../../services/gasto.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -8,49 +9,46 @@ import { GastoService } from '../../services/gasto.service';
   imports: [CommonModule],
   template: `
     <header
-      class="p-6 text-white transition-colors duration-700 ease-in-out relative overflow-hidden"
-      [ngClass]="{
-        'bg-indigo-600': gs.estado() === 'OK',
-        'bg-orange-500': gs.estado() === 'ALERTA',
-        'bg-red-600': gs.estado() === 'CRITICO'
-      }">
+      class="fixed top-0 left-0 w-full h-[72px] px-6 flex justify-between items-center bg-indigo-900 text-white z-50 shadow-md">
 
-      <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-
-      <div class="flex justify-between items-start mb-4 relative z-10">
+      <!-- Logo / Título -->
+      <div class="flex items-center gap-4">
         <div>
-          <h1 class="text-2xl font-black italic tracking-tighter">Finance SL</h1>
-          <p class="text-[10px] uppercase font-bold opacity-75 flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-green-400 inline-block animate-pulse"></span>
-            Sistema Activo
-          </p>
+          <h1 class="text-xl font-black italic tracking-tighter">Financy</h1>
         </div>
-
-        </div>
-
-      <div class="flex justify-between items-end">
-         <div class="flex items-baseline gap-1">
-            <span class="text-4xl font-black">{{ gs.total() }}€</span>
-            <span class="text-xs opacity-80">/ {{ gs.presupuestoLimite() }}€</span>
-         </div>
-
-         <div class="text-right">
-             <label class="text-[9px] uppercase opacity-70 block">Meta</label>
-             <input type="number" [value]="gs.presupuestoLimite()" (input)="cambiarLimite($event)"
-               class="w-16 bg-transparent text-right text-white font-bold border-b border-white/50 focus:border-white outline-none">
-         </div>
       </div>
 
-      <div class="mt-4 w-full h-2 bg-black/20 rounded-full overflow-hidden">
-        <div class="h-full bg-white transition-all duration-1000" [style.width.%]="anchoBarra()"></div>
+      <!-- Acciones -->
+      <div class="flex items-center gap-4">
+        <!-- Selector de tema -->
+        <button (click)="toggleTheme()" 
+          class="bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-all flex items-center justify-center border border-white/10 w-10 h-10"
+          [title]="auth.darkMode() ? 'Modo Claro' : 'Modo Oscuro'">
+          <i class="bi" [class]="auth.darkMode() ? 'bi-sun-fill' : 'bi-moon-stars-fill'"></i>
+        </button>
+
+        <!-- Cerrar Sesión -->
+        <button (click)="salir()" 
+          class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-all flex items-center gap-2 border border-white/10" 
+          title="Cerrar Sesión">
+          <i class="bi bi-door-open text-lg"></i>
+          <span class="hidden sm:inline font-bold text-sm">Cerrar Sesión</span>
+        </button>
       </div>
 
     </header>
   `
 })
+/**
+ * Barra de navegación superior.
+ * Contiene el título, el botón de cambio de tema y el botón de cerrar sesión.
+ */
 export class HeaderComponent {
-  public gs = inject(GastoService);
+  public auth = inject(AuthService);
 
-  anchoBarra() { return Math.min(this.gs.porcentaje(), 100); }
-  cambiarLimite(e: any) { this.gs.actualizarPresupuesto(Number(e.target.value)); }
+  /** Alterna entre modo claro y oscuro. */
+  toggleTheme() { this.auth.toggleDarkMode(); }
+
+  /** Cierra la sesión del usuario. */
+  salir() { this.auth.logout(); }
 }
